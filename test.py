@@ -1,21 +1,36 @@
+from depot import Depot
+from car import Car
+from car_user import CarUser
+from parking_order import ParkingOrder
 from parking_record import ParkingRecord
-from depot import depot
-from car import car
+from parking_space import ParkingSpace
 
+
+
+
+person001 = CarUser(name="user001",info="这是车主user001",car=Car("辽A888888","user001","宝马"))
+person001.set_carlist(Car("辽B666666","user001","奔驰"))
+car001 = person001.get_car_byid("辽A888888")
+car002 = person001.get_car_byid("辽B666666")
+
+
+
+
+#开始模拟流程
 print("start")
-car1 = car("辽A 888888")
-parking_record1 = ParkingRecord()
-depot1 = depot(parking_record1,car1)s
 
-depot1.set_id(car1.get_id())
-depot1.set_in_time("2018-11-22 11:11:11")
-depot1.set_packing_time("2018-11-22 11:16:11")
-car1.shopping()
-depot1.set_out_packing_time("2018-11-22 13:16:11")
-depot1.set_out_time("2018-11-22 13:11:11")
-depot1.set_money()
-depot1.end_parking()
+depot = Depot()
+#进入停车场
+depot.notes_in_depot(car002,"2018-11-26 10:00:00")
+#进入停车位
+depot.notes_in_parking_space("2018-11-26 10:05:00")
+#购物
+person001.shopping()
+#离开停车位
+depot.notes_out_parking_space("2018-11-26 12:05:00")
+#离开停车场
+depot.notes_out_depot("2018-11-26 19:10:00")
+depot.make_order()
+#结束模拟流程
+print()
 
-print("end")
-
-print(type(car1))
