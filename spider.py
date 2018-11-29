@@ -1,6 +1,7 @@
 from urllib import request
 from urllib import error
 import re
+import my_sql
 
 class Spider():
     page = 0
@@ -82,7 +83,7 @@ class Spider():
 
         book_translator = re.findall(Spider.book_translator_pattern,book_html[0],re.S)
         book_translator = self.judge(book_translator,Spider.book_translator_pattern,book_html)
-
+        
         book_year = re.findall(Spider.book_year_pattern,book_html[0],re.S)[0].strip()
         book_pages = re.findall(Spider.book_pages_pattern,book_html[0],re.S)[0].strip()
         book_money = re.findall(Spider.book_money_pattern,book_html[0],re.S)[0].strip()
@@ -130,10 +131,11 @@ class Spider():
         print("丛书：" + series)
         print("ISBN：" + isbn)
         print("简介：" + intro)    
-        Spider.count += 1      
-            
+        Spider.count += 1   
+        
         
     def go(self):
+        my_sql.create_database()
         for i in range(0,10):
             Spider.change()
             root_html = self.__fetch_contect(Spider.url)
@@ -143,15 +145,12 @@ class Spider():
                 if book_html == None:
                     continue
                 book_info = self.__analysis_bookinfo(book_html)
-                self.__show(book_info)
-
-
-
-
-
-
+                my_sql.insert_database(Spider.count,book_info)
+                Spider.count += 1
 s = Spider()
+
 s.go()
+my_sql.close_databse()
 
 
 
