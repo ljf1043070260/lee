@@ -1,0 +1,97 @@
+
+
+import time
+from collections import OrderedDict
+
+from pyexcel_xlsx import save_data
+from selenium import webdriver
+path = '/home/zhangjiwen/下载/driver/chromedriver'
+driver = webdriver.Chrome(path)
+driver.set_page_load_timeout(30)
+
+page = []
+url = 'http://manage.syjtjt.net/Parking/MenuPage/zcstart.aspx#236f2019-7716-4215-bf74-d9da482ecc7d,e0b7c6a1-29e1-4787-a2e6-3676f8c5b631,http://manage.syjtjt.net/parking/CarManage/CarWhiteListQuery.aspx,false,true'
+driver.get(url)
+time.sleep(3)
+driver.find_element_by_id('UserName').send_keys('dhan')
+driver.find_element_by_name('Password').send_keys('dhan@123')
+driver.find_element_by_xpath('//div[@class="action"]/button').click()
+time.sleep(10)
+cookie = driver.get_cookies()
+print(cookie)
+cookie1 = cookie[0]
+cookie2 = cookie[1]
+cookie3 = cookie[2]
+cookie4 = cookie[3]
+url = 'http://manage.syjtjt.net/Parking/MenuPage/zcstart.aspx#236f2019-7716-4215-bf74-d9da482ecc7d,e0b7c6a1-29e1-4787-a2e6-3676f8c5b631,http://manage.syjtjt.net/parking/CarManage/CarWhiteListQuery.aspx,false,true'
+driver.get(url)
+driver.add_cookie(cookie1)
+driver.add_cookie(cookie2)
+driver.add_cookie(cookie3)
+driver.add_cookie(cookie4)
+time.sleep(5)
+driver.refresh()
+time.sleep(10)
+driver.switch_to.frame('content')
+
+
+def get_one_page():
+
+    for i in range(100):
+        try:
+            row = []
+            car_id = driver.find_element_by_xpath('//tr[@data-rowid="frow%s"]/td[@class="f-grid-cell f-grid-cell-PlateNumber"]/div/span' % i).text
+            car_type = driver.find_element_by_xpath('//tr[@data-rowid="frow%s"]/td[@class="f-grid-cell f-grid-cell-PlateType"]/div' % i).text
+            start_time = driver.find_element_by_xpath('//tr[@data-rowid="frow%s"]/td[@class="f-grid-cell f-grid-cell-StartTime"]/div' % i).text
+            end_time = driver.find_element_by_xpath('//tr[@data-rowid="frow%s"]/td[@class="f-grid-cell f-grid-cell-EndTime"]/div' % i).text
+            discount = driver.find_element_by_xpath('//tr[@data-rowid="frow%s"]/td[@class="f-grid-cell f-grid-cell-Discount"]/div' % i).text
+            mark = driver.find_element_by_xpath('//tr[@data-rowid="frow%s"]/td[@class="f-grid-cell f-grid-cell-Remark f-last"]/div' % i).text
+            print(car_id)
+            print(car_type)
+            print(start_time)
+            print(end_time)
+            print(discount)
+            print(mark)
+            print('*'*60)
+            row.append(car_id)
+            row.append(car_type)
+            row.append(start_time)
+            row.append(end_time)
+            row.append(discount)
+            row.append(mark)
+            page.append(row)
+        except:
+            return page
+
+    return page
+
+
+def get_next_page():
+    page = get_one_page()
+    for i in range(14):
+        print(i+2)
+        if i+2 != 16:
+            driver.find_element_by_id('fineui_3').click()
+        time.sleep(10)
+        page = get_one_page()
+    field = ['车牌号', '车辆类型', '开始时间', '结束时间', '折扣', '备注']
+    to_xlsx('车辆白名单管理', field, page)
+
+
+
+def to_xlsx(name, field, datas):
+    report, results = OrderedDict(), []
+    results.append(field)
+    for data in datas:
+        results.append(data)
+    report.update({name: results})
+    name = '%s.xlsx' % name
+    file = '/home/zhangjiwen/' + name
+    save_data(file, report)
+
+
+if __name__ == '__main__':
+    get_next_page()
+
+
+
